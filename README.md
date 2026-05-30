@@ -384,24 +384,6 @@ npm run dev -- --host 0.0.0.0
 
 After changing `.env`, restart both frontend and backend servers.
 
-## Environment File Notes
-
-Do not commit real `.env` files to GitHub.
-
-Only commit `.env.example` files.
-
-Recommended `.gitignore` entries:
-
-```gitignore
-.env
-backend/.env
-frontend/.env
-node_modules
-backend/node_modules
-frontend/node_modules
-.DS_Store
-```
-
 ## Troubleshooting
 
 ### Frontend cannot connect to backend
