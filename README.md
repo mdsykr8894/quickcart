@@ -124,7 +124,7 @@ PostgreSQL: 14 or above
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/quickcart.git
+git clone https://github.com/mdsykr8894/quickcart.git
 cd quickcart
 ```
 
