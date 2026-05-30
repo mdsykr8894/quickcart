@@ -1,0 +1,204 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------------------------------------------------
+// Enums
+// -------------------------------------------------------------
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+// -------------------------------------------------------------
+// Models
+// -------------------------------------------------------------
+
+model User {
+  id           String     @id @default(uuid())
+  username     String     @unique
+  email        String     @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         Role       @default(USER)
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  
+  // Saved Malaysian shipping address fields
+  shippingFullName     String?
+  shippingPhone        String?
+  shippingAddressLine1 String?
+  shippingAddressLine2 String?
+  shippingCity         String?
+  shippingState        String?
+  shippingPostalCode   String?
+  shippingCountry      String?    @default("Malaysia")
+
+  // Profile image upload details
+  profileImageName     String?
+  profileImagePath     String?
+  profileImageMime     String?
+
+  // Relations
+  cartItems    CartItem[]
+  orders       Order[]
+  auditLogs    AuditLog[]
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  products    Product[]
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  slug        String      @unique
+  description String?
+  price       Decimal     @db.Decimal(10, 2)
+  stock       Int         @default(0)
+  imageName   String?
+  imagePath   String?     // Internal only, must never be returned in API payloads
+  imageMime   String?
+  isActive    Boolean     @default(true) // For soft deletion
+  categoryId  String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  images      ProductImage[]
+
+  // Indexes for high performance query resolution
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  imageName String
+  imagePath String
+  imageMime String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // Compound constraint: user can have a unique product in cart only once
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+}
+
+model Order {
+  id           String      @id @default(uuid())
+  userId       String
+  status       OrderStatus @default(PENDING)
+  totalAmount  Decimal     @db.Decimal(10, 2)
+  fullName     String
+  phone        String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  postalCode   String
+  country      String      @default("Malaysia")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  
+  // Relations
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items        OrderItem[]
+
+  // Indexes for querying
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  productId   String
+  productName String   // Snapshot at checkout to preserve historic name changes
+  unitPrice   Decimal  @db.Decimal(10, 2) // Snapshot at checkout to preserve billing integrity
+  quantity    Int
+  subtotal    Decimal  @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Restrict) // Guard history
+
+  // Indexes
+  @@index([orderId])
+  @@index([productId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  status    String
+  ipAddress String?
+  userAgent String?
+  details   String?  // Generic, safe indicators; must NEVER log secret keys, tokens, or plain credentials
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Indexes
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model AppSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
