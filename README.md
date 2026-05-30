@@ -1,14 +1,40 @@
 # QuickCart
 
-QuickCart is a full-stack ecommerce web application that allows users to browse products, add items to cart, place orders, and manage their profile. It also includes an admin dashboard for managing products, users, orders, and audit logs.
+QuickCart is a full-stack ecommerce web application built with React, Express, Prisma, and PostgreSQL. It provides a complete shopping flow for users and an admin dashboard for managing products, users, orders, and audit logs.
 
-The project is built with React, Express, Prisma, and PostgreSQL.
+## Features
 
-## Project Overview
+### Customer Features
 
-QuickCart provides a simple ecommerce experience for normal users and a management dashboard for admin users.
+* Register and login
+* Browse products
+* View product details
+* Add products to cart
+* Place orders
+* View order history
+* Manage profile
+* Upload profile image
 
-Users can browse the catalog, view product details, add products to cart, checkout, view order history, and update their profile. Admin users can manage products, view orders, manage users, and monitor system activity.
+### Admin Features
+
+* Admin dashboard
+* Product management
+* Add, update, and deactivate products
+* Manage users
+* View and manage orders
+* View audit logs
+
+### Application Features
+
+* Product categories
+* Product image upload
+* Cart and checkout flow
+* Responsive layout for desktop and mobile
+* API documentation with Swagger
+* Cookie-based authentication
+* Role-based access control
+* Input validation
+* Audit logging
 
 ## Tech Stack
 
@@ -28,43 +54,15 @@ Users can browse the catalog, view product details, add products to cart, checko
 * Prisma ORM
 * PostgreSQL
 * bcrypt
-* JWT / cookie-based authentication
+* JWT
 * Helmet
 * CORS
 * Multer
 
-## Main Features
+### Database
 
-### User Features
-
-* User registration
-* Login and logout
-* Browse products
-* View product details
-* Add products to cart
-* Place orders
-* View order history
-* Manage user profile
-* Upload profile image
-
-### Admin Features
-
-* Admin dashboard
-* Product management
-* Add, edit, and deactivate products
-* View and manage orders
-* Manage users
-* View audit logs
-
-### Application Features
-
-* Product categories
-* Product image upload
-* Cart and checkout flow
-* Order tracking
-* User profile image support
-* Responsive layout for desktop and mobile
-* API documentation using Swagger
+* PostgreSQL
+* Docker Compose support for local database setup
 
 ## Project Structure
 
@@ -100,24 +98,20 @@ QuickCart
 │   ├── .env.example
 │   └── package.json
 │
+├── docker-compose.yml
 └── README.md
 ```
 
 ## Requirements
 
-Before running this project, make sure you have installed:
+Make sure the following tools are installed:
 
-* Node.js
+* Node.js 18 or above
 * npm
-* PostgreSQL
+* Docker Desktop
 * Git
 
-Recommended versions:
-
-```text
-Node.js: 18 or above
-PostgreSQL: 14 or above
-```
+PostgreSQL can be installed manually, but the recommended setup is using Docker Compose.
 
 ## Getting Started
 
@@ -128,7 +122,38 @@ git clone https://github.com/mdsykr8894/quickcart.git
 cd quickcart
 ```
 
-Replace `YOUR_USERNAME` with your GitHub username.
+## Database Setup with Docker
+
+This project includes a Docker Compose file for running PostgreSQL locally.
+
+Start the database container:
+
+```bash
+docker compose up -d
+```
+
+This will start a PostgreSQL database using the following default configuration:
+
+```text
+Database: quickcart_db
+Username: quickcart_user
+Password: quickcart_password
+Port: 5432
+```
+
+To stop the database container:
+
+```bash
+docker compose down
+```
+
+To stop the database and remove the stored database volume:
+
+```bash
+docker compose down -v
+```
+
+Use `docker compose down -v` only if you want to completely remove the database data.
 
 ## Backend Setup
 
@@ -144,7 +169,7 @@ Install dependencies:
 npm install
 ```
 
-Create a `.env` file:
+Create a `.env` file from the example file:
 
 ```bash
 cp .env.example .env
@@ -153,33 +178,34 @@ cp .env.example .env
 Example backend `.env`:
 
 ```env
-PORT=5001
 NODE_ENV=development
+PORT=5001
 
-DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/quickcart_db?schema=public"
+DATABASE_URL=postgresql://quickcart_user:quickcart_password@localhost:5432/quickcart_db
 
-JWT_SECRET="replace-this-with-a-strong-secret"
-JWT_EXPIRES_IN="1d"
+JWT_SECRET=replace-this-with-a-long-random-secret
+JWT_EXPIRES_IN=1h
 
-COOKIE_NAME="quickcart_token"
-COOKIE_SAME_SITE="lax"
+CLIENT_URL=http://localhost:5173
+CLIENT_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 
-CLIENT_ORIGINS="http://localhost:5173,http://127.0.0.1:5173"
+COOKIE_NAME=quickcart_token
+COOKIE_HTTP_ONLY=true
+COOKIE_SECURE=false
+COOKIE_SAME_SITE=lax
+
+UPLOAD_MAX_SIZE_MB=2
+
+SWAGGER_ENABLED=true
 ```
 
-Create the PostgreSQL database manually if it does not exist:
-
-```sql
-CREATE DATABASE quickcart_db;
-```
-
-Run Prisma migration:
+Run Prisma migrations:
 
 ```bash
 npx prisma migrate dev
 ```
 
-Run database seed:
+Seed the database:
 
 ```bash
 npx prisma db seed
@@ -197,7 +223,7 @@ Start the backend server:
 npm run dev
 ```
 
-Backend will run at:
+The backend will run at:
 
 ```text
 http://localhost:5001
@@ -211,7 +237,7 @@ http://localhost:5001/api/docs
 
 ## Frontend Setup
 
-Open a new terminal and go to the frontend folder:
+Open a new terminal from the project root and go to the frontend folder:
 
 ```bash
 cd frontend
@@ -223,25 +249,25 @@ Install dependencies:
 npm install
 ```
 
-Create a `.env` file:
+Create a `.env` file from the example file:
 
 ```bash
 cp .env.example .env
 ```
 
-Example frontend `.env` for normal localhost testing:
+Example frontend `.env`:
 
 ```env
 VITE_API_BASE_URL=http://localhost:5001/api
 ```
 
-Start the frontend:
+Start the frontend development server:
 
 ```bash
 npm run dev
 ```
 
-Frontend will run at:
+The frontend will run at:
 
 ```text
 http://localhost:5173
@@ -249,7 +275,7 @@ http://localhost:5173
 
 ## Default Admin Account
 
-After running the seed file, use this account to login as admin:
+After running the seed file, use this account to access the admin dashboard:
 
 ```text
 Username: admin
@@ -258,18 +284,18 @@ Password: Admin@12345
 Role: ADMIN
 ```
 
-Normal users can be created through the Register page.
+Normal customer accounts can be created through the Register page.
 
 ## Reset Database and Run Seed Again
 
-Use this command if you want to clear the database, apply migrations again, and run the seed file:
+To clear the database, re-run migrations, and seed the database again:
 
 ```bash
 cd backend
 npx prisma migrate reset --force
 ```
 
-If the seed does not run automatically, run:
+If the seed does not run automatically:
 
 ```bash
 npx prisma db seed
@@ -281,35 +307,15 @@ or:
 node prisma/seed.js
 ```
 
-## LAN / Mobile Testing
+## Useful Commands
 
-If you want to open the website on your phone using your laptop IP address, update the frontend `.env`:
-
-```env
-VITE_API_BASE_URL=http://YOUR_IP_ADDRESS:5001/api
-```
-
-Then start the frontend with host access:
+### Docker
 
 ```bash
-npm run dev -- --host 0.0.0.0
+docker compose up -d
+docker compose down
+docker compose down -v
 ```
-
-Open the website on your phone:
-
-```text
-http://YOUR_IP_ADDRESS:5173
-```
-
-Make sure the backend `.env` includes your LAN frontend URL:
-
-```env
-CLIENT_ORIGINS="http://localhost:5173,http://127.0.0.1:5173,http://YOUR_IP_ADDRESS:5173"
-```
-
-After changing `.env`, restart both frontend and backend servers.
-
-## Useful Commands
 
 ### Backend
 
@@ -329,7 +335,6 @@ npx prisma studio
 cd frontend
 npm install
 npm run dev
-npm run dev -- --host 0.0.0.0
 npx tsc --noEmit
 ```
 
@@ -354,13 +359,38 @@ The backend serves uploaded files through:
 /uploads/profiles
 ```
 
+## Testing from Another Device on the Same Network
+
+To test the app from another device on the same network, update the environment files using your machine IP address.
+
+Frontend `.env`:
+
+```env
+VITE_API_BASE_URL=http://YOUR_IP_ADDRESS:5001/api
+```
+
+Backend `.env`:
+
+```env
+CLIENT_URL=http://YOUR_IP_ADDRESS:5173
+CLIENT_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://YOUR_IP_ADDRESS:5173
+```
+
+Start the frontend with host access:
+
+```bash
+npm run dev -- --host 0.0.0.0
+```
+
+After changing `.env`, restart both frontend and backend servers.
+
 ## Environment File Notes
 
 Do not commit real `.env` files to GitHub.
 
 Only commit `.env.example` files.
 
-Make sure `.gitignore` includes:
+Recommended `.gitignore` entries:
 
 ```gitignore
 .env
@@ -378,37 +408,42 @@ frontend/node_modules
 
 Check the following:
 
-1. Backend is running on port `5001`.
-2. Frontend `.env` uses the correct `VITE_API_BASE_URL`.
-3. Backend `.env` includes the correct `CLIENT_ORIGINS`.
-4. Restart both frontend and backend after editing `.env`.
+1. The backend server is running on port `5001`.
+2. The frontend `.env` contains the correct `VITE_API_BASE_URL`.
+3. The backend `.env` contains the correct `CLIENT_ORIGINS`.
+4. Both frontend and backend servers have been restarted after editing `.env`.
 
-### Login works on localhost but not on mobile/LAN IP
+### Database connection error
 
-Use the LAN IP in frontend `.env`:
-
-```env
-VITE_API_BASE_URL=http://YOUR_IP_ADDRESS:5001/api
-```
-
-Add the LAN frontend origin to backend `.env`:
-
-```env
-CLIENT_ORIGINS="http://localhost:5173,http://127.0.0.1:5173,http://YOUR_IP_ADDRESS:5173"
-```
-
-Start Vite with:
+Make sure the PostgreSQL Docker container is running:
 
 ```bash
-npm run dev -- --host 0.0.0.0
+docker compose ps
 ```
 
-Then restart both servers.
+If it is not running, start it:
+
+```bash
+docker compose up -d
+```
+
+### Prisma migration error
+
+Make sure the database container is running, then run:
+
+```bash
+cd backend
+npx prisma migrate dev
+```
+
+### Login does not work after changing host or IP
+
+Clear the browser site data and restart both servers. Then check that the frontend API URL and backend allowed origins are using the same host setup.
 
 ## Notes
 
-This project includes common web application protection such as password hashing, role-based access control, input validation, CSRF protection, secure cookies, upload validation, and audit logging. These are implemented to support safer ecommerce operations.
+QuickCart includes common ecommerce application protections such as password hashing, role-based access control, input validation, CSRF protection, secure cookies, upload validation, and audit logging.
 
 ## Author
 
-QuickCart was developed as a full-stack ecommerce web application project.
+Developed by Muhammad Syakir.
