@@ -359,31 +359,6 @@ The backend serves uploaded files through:
 /uploads/profiles
 ```
 
-## Testing from Another Device on the Same Network
-
-To test the app from another device on the same network, update the environment files using your machine IP address.
-
-Frontend `.env`:
-
-```env
-VITE_API_BASE_URL=http://YOUR_IP_ADDRESS:5001/api
-```
-
-Backend `.env`:
-
-```env
-CLIENT_URL=http://YOUR_IP_ADDRESS:5173
-CLIENT_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://YOUR_IP_ADDRESS:5173
-```
-
-Start the frontend with host access:
-
-```bash
-npm run dev -- --host 0.0.0.0
-```
-
-After changing `.env`, restart both frontend and backend servers.
-
 ## Troubleshooting
 
 ### Frontend cannot connect to backend
